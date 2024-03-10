@@ -2,7 +2,7 @@ import { Sequelize } from "sequelize"
 const sequelize = new Sequelize("MR15", "postgres", "database1", {
   host: "localhost",
   port:5432,
-  
+  logging:false,
   dialect: "postgres",
 })
 const connectDB = async () => {

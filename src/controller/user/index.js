@@ -83,6 +83,81 @@ const userController = {
       })
     }
   },
+  getOneUser: async (req, res) => {
+    try {
+      const user_id = req.params.user_id;
+
+      const user = await userModel.findByPk(user_id, {
+        include: [ContactModel, PostModel],
+      });
+
+
+      if (!user) {
+        return res.status(404).json({
+          message: "No user found",
+        });
+      }
+      
+      res.json({
+        user,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        message: "Something bad happened to server",
+      });
+    }
+  },
+  updateUser: async (req, res) => {
+    try {
+      const user_id = req.params.user_id;
+       const payload=req.body;
+      const user = await userModel.findByPk(user_id);
+      if (!user) {
+        return res.status(404).json({
+          message: "No user found",
+        });
+      }
+      const schema = Joi.object({
+        firstName: Joi.string().min(3).max(30).required(),
+        lastName: Joi.string().min(3).max(900),
+        email: Joi.string(),
+        username: Joi.string(),
+        password: Joi.string().min(3).max(900),
+        phone:Joi.string().min(3).max(900),
+      })
+  
+      const isValidate = schema.validate(payload)
+      if (isValidate.error) {
+        return res
+          .status(400)
+          .json({ message: "Invalid data", error: isValidate.error })
+      }
+      user.firstName = payload.firstName
+      user.lastName = payload.lastName
+      user.email = payload.email
+      user.username = payload.username
+      user.password = payload.password
+      await user.save()
+      await ContactModel.create({
+        phone: payload.phone,
+        mobile: payload.mobile,
+        userId: user.id,
+
+      
+      })
+      
+
+      res.json({
+        user,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        message: "Something bad happened to server",
+      });
+    }
+  },
   
   getFollowerPosts: async (req, res) => {
     try {
